@@ -47,6 +47,9 @@ class QWall:
 class QMove:
     def __init__(self, q_string):
         self.q_string = q_string
+        self.color = 0 #TODO Parse qstring
+    def getQPlayerColor(self):
+        return self.color
     def isWallPlace(self):
         return False
     def isPlayerMove(self):
@@ -65,8 +68,11 @@ class QMoveWall(QMove):
 class QMovePlayer(QMove):
     def __init__(self, q_string):
         QMove.__init__(q_string)
-        self.coords = tuple(0,0) #TODO Parse q_string into coords
+        self.coords_to = tuple(0,0) #TODO Parse q_string into coords
         self.color = 0 #TODO Parse q_string into color
+        self.walls_remaining = 10
+    def getCountWalls(self):
+        return self.walls_remaining
     def isWallPlace(self):
         return False
     def isPLayerMove(self):
@@ -132,24 +138,87 @@ class QuoridorGame:
         return self.board
     def getQPlayerById(self, q_id):
         return self.players[0] if self.players[0].getId() == q_id else players[1]
+    def getQPlayerByColor(self, color):
+        return self.players[0] if self.players[0].getColor() == color else player[1]
 
-    def movePlayer(q_id, new_pos):
-        t_player = getQPlayerById(q_id)
-        t_player.move(new_pos)
-        updateBoard()
+    def movePlayer(q_id, q_pmove):
+        if(!validMove(q_pmove)):
+            return False
+        q_player = getQPlayerById(q_id)
+        updateBoard(q_pmove)
+        q_player.move(q_pmove.getCoords())
         if(isDone()):
             endGame()
-    def addWall(q_wall):
-        self.walls.append(q_wall)
+        return True
+
+    def placeWall(q_id, q_wmove):
+        if(!validMove(q_wmove)):
+            return False
+
+        self.walls.append(q_wmove.getWall())
+        q_player = getQPlayerById(q_id)
         updateBoard()
-    
+        return True
+
     def isDone():
         return players[0].coords[1] = i-1 or players[1].coords[1] = 0
    
-    def validPlayerMove(q_str_move):
-       a = 1 #TODO Validate player move / wall place and delegate to correct method
+    def validMove(q_move):
+        return validWallPlace(q_move) if q_move.isWallPlace() else validPlayerMove(q_move)
+
+    def validWallPlace(q_wmove):
+            wall_t = q_wmove.getWall()
+            nw,se = wall_t.getCoords()
+            ori = wall_t.getOrient()
+
+            #Check to make sure it's within bounds
+            if(nw[0] < 0 or se[0] < 0 or nw[1] > i-1 or se[1] > j-1):
+                return False
+
+            #Check for making sure it's not place on top of other wall
+            for w in self.walls:
+                if w.orient == ori and nw == w.getCoords()[0] and se.getCoords()[1] == se:
+                    return False
+                if w.orient = "h":
+                    if nw == w.getCoords[0] and se == tuple(se[0], se[1]-1):
+                            return False
+                if w.orient = "v":
+                    if nw == w.getCoords()[0] == and tuple(se[0]+1, se[1]):
+                            return False
+            #Check to make sure there's still a path to the goal
+            #TODO Implement A* or something else
+            return True
 
 
-    def updateBoard():
-        a = 1 #Get last move and update accordingly    
+    def validPlayerMove(q_pmove):
+       if(q_pmove.getPlayerColor() != self.color_turn):
+           return False
+       q_player = getQPlayerByColor(q_pmove.getPlayerColor())
+       x,y = qp_move.getTo();
+
+       #Make sure the move request is in the bound of the board and it's not the same position
+       if(x > 0 and x >= self.i):
+           return False
+       if(y < 0 or y >= self.j):
+           return False
+       if(x == q_player.getCoords()[0] and y == q_player.getCoords()[1]):
+           return False
+        if(!isConnected(q_player.getCoords(), tuple(x,y)):
+                return False
+        return True
+
+    def updateBoard(last_p_move):
+        if self.last_move == None:
+            return
+
+        if self.last_move.isWallPlace():
+            a = 1
+        else:
+            x,y = last_p_move.getCoords();
+            p_x, p_y, = self.getPlayerByColor(last_p_move.getPlayerColor())
+
+            for j in range(0, self.j*self.j):
+                pos_to_update = self.board[transform_to_sparse(tuple(p_x,p_y), self.i)][j]
+        
+
 
