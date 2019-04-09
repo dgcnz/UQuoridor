@@ -1,6 +1,6 @@
 import numpy
 import uuid
-
+import re
 def transform_to_sparse(coords, i):
     return coords[0]*i-1+coords[1]
 
@@ -134,6 +134,13 @@ class QuoridorGame:
     def disconnect(self, coords1, coords2):
         self.board[transform_to_sparse(coords1)][transform_to_sparse(coords2)] = 0
 
+    def parse_string(qstr, i, j):
+        parser = re.compile("^(?:w|b)(([a-i][1-9])|([a-i][1-9](v|h)))$")
+        while(True):
+            ipt =str(input(""))
+            m = parser.match(ipt)
+            print m.group()
+    
     def getState(self):
         return self.board
     def getQPlayerById(self, q_id):
