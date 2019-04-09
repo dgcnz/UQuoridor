@@ -1,0 +1,36 @@
+
+       a   b   c   d   e   f   g   h   i
+
+   1   ☐   ☐ ║ ☐   ☐   ☐   ☐   ☐   ☐   ☐
+             ║
+   2   ☐   ➁ ║ ➊   ☐   ☐   ☐   ☐   ☐   ➀
+           ═════
+   3   ☐   ☐   ☐   ☐   ☐   ☐   ☐   ☐   ☐
+
+   4   ☐   ☐   ➋   ☐   ☐   ☐   ☐   ☐   ☐
+
+   5   ☐   ☐   ☐   ☐   ☐   ☐   ☐   ☐   ☐
+
+   6   ☐   ☐   ☐   ☐   ☐   ☐   ☐   ☐   ☐
+
+   7   ☐   ☐   ☐   ☐   ☐   ☐   ☐   ☐   ☐
+
+   8   ☐   ☐   ☐   ☐   ☐   ☐   ☐   ☐   ☐
+
+   9   ☐   ☐   ☐   ☐   ☐   ☐   ☐   ☐   ☐
+
+
+board dimensions:
+40 x 20
+
+pieces:
+    * black: 278A - 2793
+    * white: 2780 - 2789
+    * https://jrgraphix.net/r/Unicode/2700-27BF
+walls:
+    * vertical -> 2551
+    * horizontal -> 2550
+    * https://jrgraphix.net/r/Unicode/2500-257F
+space:
+    * 2610
+    * https://jrgraphix.net/r/Unicode/2600-26FF
