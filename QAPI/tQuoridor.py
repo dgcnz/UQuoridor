@@ -27,18 +27,11 @@ class QPlayer:
 
 
 class QWall:
-    """
-        :param north_west: (int,int) leftmost corner where wall should be placed
-        :param orient: Defining if walls is to be place horizontally or vertically
-    """
     def __init__(self, north_west, orient):
         assert orient.lower() == "v" or orient.lower() == "h" #Move all the check for correct input to where to before object creation
         self.south_east = tuple(north_west.x, north_west.y) if orient.lower() == v else tuple(north_west.x+1, north_west.y)
         self.north_west = north_west
         self.orient = orient
-    """
-        :returns: tuple of tuple of (x,y) coordinates of oposite ends of the wall 
-    """
     def getCoords(self):
         return tuple(self.north_west, self.south_east)
     def getOrient(self):
