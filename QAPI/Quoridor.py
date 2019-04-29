@@ -208,7 +208,7 @@ class QuoridorGame:
             if(p_y < self.j-1):
                 self.board[transform_to_sparse(tuple(x,y), self.i)][transform_to_sparse(tuple(p_x, p_y+1), self.i)] = 1
             
-            for w in self.walls:
+            for w in self.walls: #TODO Write conditions for checking a wall when a ove is made
                 if(p_x > 0):
                     if( (w.north_west[0] == p_x - 1 and w.north_west[1] == p_y) or w.north_west[
         
