@@ -1,98 +1,63 @@
 import numpy
 import uuid
 import re
-def transform_to_sparse(coords, i):
+from typing import NewType, Tuple
+
+Color = NewType("Color", str)
+Orient = NewType("Orient", str)
+SparsePoint = NewType("SparsePoint", tuple)
+SparseCoords = NewType("SparseCoords", tuple) 
+
+#Coords = tuple(x, y)
+#i = board size i
+def transform_to_sparse(coords:SparsePoint, i:int):
     return coords[0]*i-1+coords[1]
 
 class QPlayer:
-    def __init__(self, name):
+    def __init__(self, name:str):
         self.uuid = uuid.uuid1()
-        self.name = name
-        self.pos_x = 0
-        self.pos_y = 0
-        self.color = None
+        self.name:str = name
+        self.pos_x:int = 0
+        self.pos_y:int = 0
+        self.color:Color = None
     def getId(self):
         return self.uuid
-    def getName(self):
-        return self.name
-    def getColor(self):
+    def getName(self)->str:
+        return self.name:str
+    def getColor(self)->str:
         return self.color
-    def getCoords(self):
+    def getCoords(self)->SparsePoint:
         return tuple(self.pos_x, self.pos_y)
-    def move(self, pos):
-        self.pos_x = pos[0]
-        self.pos_y = pos[1]
-    def setColor(self, color):
-        self.color = color
+
+    def move(self, pos:SparsePoint):
+        self.pos_x:int = pos[0]
+        self.pos_y:int = pos[1]
+    def setColor(self, color:Color):
+        self.color:Color = color
 
 
 class QWall:
-    """
-        :param north_west: (int,int) leftmost corner where wall should be placed
-        :param orient: Defining if walls is to be place horizontally or vertically
-    """
     def __init__(self, north_west, orient):
         assert orient.lower() == "v" or orient.lower() == "h" #Move all the check for correct input to where to before object creation
         self.south_east = tuple(north_west.x, north_west.y) if orient.lower() == v else tuple(north_west.x+1, north_west.y)
         self.north_west = north_west
-        self.orient = orient
-    """
-        :returns: tuple of tuple of (x,y) coordinates of oposite ends of the wall 
-    """
-    def getCoords(self):
+        self.orient:Orient = orient
+    def getCoords(self)->tuple:
         return tuple(self.north_west, self.south_east)
-    def getOrient(self):
+    def getOrient(self)->Orient:
         return self.orient
 
-class QMove:
-    def __init__(self, q_string):
-        self.q_string = q_string
-        self.color = 0 #TODO Parse qstring
-    def getQPlayerColor(self):
-        return self.color
-    def isWallPlace(self):
-        return False
-    def isPlayerMove(self):
-        return False
-
-class QMoveWall(QMove):
-    def __init__(self, q_string):
-        QMove.__init__(q_string)
-        self.wall = QWall(tuple(0,0), "h") #TODO Parse into wall movement and orientation
-    def isWallPlace(self):
-        return True
-    def isPlayerMove(self):
-        return False
-    def getWall(self):
-        return self.wall
-class QMovePlayer(QMove):
-    def __init__(self, q_string):
-        QMove.__init__(q_string)
-        self.coords_to = tuple(0,0) #TODO Parse q_string into coords
-        self.color = 0 #TODO Parse q_string into color
-        self.walls_remaining = 10
-    def getCountWalls(self):
-        return self.walls_remaining
-    def isWallPlace(self):
-        return False
-    def isPLayerMove(self):
-        return True
-    def getQPlayerColor(self):
-        return self.color
-    def getTo(self):
-        return self.coords_to
-
 class QuoridorGame:
-    def __init__(self, i, j):
-        self.turn_time = 15
-        self.i = i
-        self.j = j
+    def __init__(self, i:int, j:int):
+        self.turn_time:int = 15
+        self.i:int = i
+        self.j:int = j
         self.board = numpy.zeroes(i*i,j*j)
-        self.players = []
-        self.walls = []
-        self.color_turn = "w"
+        self.players:list = []
+        self.walls:list = []
+        self.color_turn:Color = "w"
         self.last_move = None
-        self.running = False
+        self.running:bool = False
 
     def populateBoard(self):
         for x in range(0, i):
@@ -127,14 +92,17 @@ class QuoridorGame:
     def endGame(self):
         self.running = False
 
-    def isConnected(self, coords1, coords2):
+    def isConnected(self, coords1:SparsePoint, coords2:SparsePoint)->bool:
         return self.board[transform_to_sparse(coords1)][transform_to_sparse(coords2)]
-    def connect(self, coords1, coords2):
+    
+    def connect(self, coords1:SparsePoint, coords2:SparsePoint):
         self.board[transform_to_sparse(coords1)][transform_to_sparse(coords2)] = 1
-    def disconnect(self, coords1, coords2):
+
+    def disconnect(self, coords1:SparsePoint, coords2:SparsePoint):
         self.board[transform_to_sparse(coords1)][transform_to_sparse(coords2)] = 0
 
-    def parse_string(qstr, i, j):
+    #TODO FIXXX
+    def parse_string(self, qstr:str, i:int, j:int):
         parser = re.compile("^(?:w|b)(([a-i][1-9])|([a-i][1-9](v|h)))$")
         while(True):
             ipt =str(input(""))
@@ -145,10 +113,10 @@ class QuoridorGame:
         return self.board
     def getQPlayerById(self, q_id):
         return self.players[0] if self.players[0].getId() == q_id else players[1]
-    def getQPlayerByColor(self, color):
+    def getQPlayerByColor(self, color:Color):
         return self.players[0] if self.players[0].getColor() == color else player[1]
 
-    def movePlayer(q_id, q_pmove):
+    def movePlayer(self, q_id, q_pmove)->bool:
         if(!validMove(q_pmove)):
             return False
         q_player = getQPlayerById(q_id)
@@ -158,7 +126,7 @@ class QuoridorGame:
             endGame()
         return True
 
-    def placeWall(q_id, q_wmove):
+    def placeWall(self, q_id, q_wmove)->bool:
         if(!validMove(q_wmove)):
             return False
 
@@ -167,13 +135,13 @@ class QuoridorGame:
         updateBoard()
         return True
 
-    def isDone():
+    def isDone(self)->bool:
         return players[0].coords[1] = i-1 or players[1].coords[1] = 0
    
-    def validMove(q_move):
+    def validMove(self, q_move)->bool:
         return validWallPlace(q_move) if q_move.isWallPlace() else validPlayerMove(q_move)
 
-    def validWallPlace(q_wmove):
+    def validWallPlace(self, q_wmove)->bool:
             wall_t = q_wmove.getWall()
             nw,se = wall_t.getCoords()
             ori = wall_t.getOrient()
@@ -197,7 +165,7 @@ class QuoridorGame:
             return True
 
 
-    def validPlayerMove(q_pmove):
+    def validPlayerMove(self, q_pmove)->bool:
        if(q_pmove.getPlayerColor() != self.color_turn):
            return False
        q_player = getQPlayerByColor(q_pmove.getPlayerColor())
@@ -214,18 +182,35 @@ class QuoridorGame:
                 return False
         return True
 
-    def updateBoard(last_p_move):
+    def updateBoard(self, last_p_move):
         if self.last_move == None:
             return
 
-        if self.last_move.isWallPlace():
-            a = 1
-        else:
-            x,y = last_p_move.getCoords();
-            p_x, p_y, = self.getPlayerByColor(last_p_move.getPlayerColor())
+        #Update move on wall move
 
-            for j in range(0, self.j*self.j):
-                pos_to_update = self.board[transform_to_sparse(tuple(p_x,p_y), self.i)][j]
+        if self.last_move.isWallPlace():
+            #TODO Update move when wall is placed
+            a = 1
+
+        #Update board on player move
+        else:
+            x,y = last_p_move.getCoords()
+            p_x, p_y, = self.getPlayerByColor(last_p_move.getPlayerColor()).getCoords()
+            
+            #Check sparse matrix for all positions pointing to the last place and updates
+            #TODO Check for walls
+            if(p_x > 0):
+                self.board[transform_to_sparse(tuple(x,y), self.i)][transform_to_sparse(tuple(p_x-1, p_y), self.i)] = 1
+            if(p_x < self.i-1):
+                self.board[transform_to_sparse(tuple(x,y), self.i)][transform_to_sparse(tuple(p_x+1, p_y), self.i)] = 1
+            if(p_y > 0):
+                self.board[transform_to_sparse(tuple(x,y), self.i)][transform_to_sparse(tuple(p_x, p_y-1), self.i)] = 1
+            if(p_y < self.j-1):
+                self.board[transform_to_sparse(tuple(x,y), self.i)][transform_to_sparse(tuple(p_x, p_y+1), self.i)] = 1
+            
+            for w in self.walls:
+                if(p_x > 0):
+                    if( (w.north_west[0] == p_x - 1 and w.north_west[1] == p_y) or w.north_west[
         
 
 
