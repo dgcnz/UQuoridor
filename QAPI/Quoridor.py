@@ -219,3 +219,4 @@ class QuoridorGame:
 
 
 
+        self.save_move(new_move, self.current_player)

@@ -1,5 +1,6 @@
 from c_types import Coordinates
 
+
 class QWall:
     def __init__(self, nw: Coordinates, orientation: str):
 
