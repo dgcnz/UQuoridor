@@ -91,14 +91,14 @@ class QuoridorGame:
         for x in range(0, i):
             for y in range(0, j):
                 if(x - 1 >= 0):
-                    self.connect(tuple(x,y), tuple(x-1,y)) 
+                    self.connect(tuple(x,y), tuple(x-1,y))
                 if(x + 1 < self.i):
                     self.connect(tuple(x,y), tuple(x+1,y))
                 if(y - 1 >= 0):
                     self.connect(tuple(x,y), tuple(x,y-1))
                 if(y + 1 < self.j)
                     self.connect(tuple(x,y), tuple(x,y-1))
-    
+
     def addPlayer(self, qplayer):
         assert len(players) < 2
 
@@ -133,7 +133,7 @@ class QuoridorGame:
             ipt =str(input(""))
             m = parser.match(ipt)
             print m.group()
-    
+
     def getState(self):
         return self.board
     def getQPlayerById(self, q_id):
@@ -162,7 +162,7 @@ class QuoridorGame:
 
     def isDone():
         return players[0].coords[1] = i-1 or players[1].coords[1] = 0
-   
+
     def validMove(q_move):
         return validWallPlace(q_move) if q_move.isWallPlace() else validPlayerMove(q_move)
 
@@ -219,6 +219,6 @@ class QuoridorGame:
 
             for j in range(0, self.j*self.j):
                 pos_to_update = self.board[transform_to_sparse(tuple(p_x,p_y), self.i)][j]
-        
+
 
 

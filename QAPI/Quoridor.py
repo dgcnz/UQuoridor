@@ -6,10 +6,11 @@ from typing import NewType, Tuple
 Color = NewType("Color", str)
 Orient = NewType("Orient", str)
 SparsePoint = NewType("SparsePoint", tuple)
-SparseCoords = NewType("SparseCoords", tuple) 
+SparseCoords = NewType("SparseCoords", tuple)
 
 #Coords = tuple(x, y)
 #i = board size i
+
 def transform_to_sparse(coords:SparsePoint, i:int):
     return coords[0]*i-1+coords[1]
 
@@ -22,10 +23,13 @@ class QPlayer:
         self.color:Color = None
     def getId(self):
         return self.uuid
+
     def getName(self)->str:
-        return self.name:str
+        return self.name
+
     def getColor(self)->str:
         return self.color
+
     def getCoords(self)->SparsePoint:
         return tuple(self.pos_x, self.pos_y)
 
@@ -63,20 +67,20 @@ class QuoridorGame:
         for x in range(0, i):
             for y in range(0, j):
                 if(x - 1 >= 0):
-                    self.connect(tuple(x,y), tuple(x-1,y)) 
+                    self.connect(tuple(x,y), tuple(x-1,y))
                 if(x + 1 < self.i):
                     self.connect(tuple(x,y), tuple(x+1,y))
                 if(y - 1 >= 0):
                     self.connect(tuple(x,y), tuple(x,y-1))
-                if(y + 1 < self.j)
+                if(y + 1 < self.j):
                     self.connect(tuple(x,y), tuple(x,y-1))
-    
+
     def addPlayer(self, qplayer):
         assert len(players) < 2
 
         if(len(players) == 1):
             qplayer.color = "w" if players[0].color == "b" else "b"
-        else
+        else:
             qplayer.color = "w"
 
         players.append(qplayer)
@@ -94,7 +98,7 @@ class QuoridorGame:
 
     def isConnected(self, coords1:SparsePoint, coords2:SparsePoint)->bool:
         return self.board[transform_to_sparse(coords1)][transform_to_sparse(coords2)]
-    
+
     def connect(self, coords1:SparsePoint, coords2:SparsePoint):
         self.board[transform_to_sparse(coords1)][transform_to_sparse(coords2)] = 1
 
@@ -107,8 +111,8 @@ class QuoridorGame:
         while(True):
             ipt =str(input(""))
             m = parser.match(ipt)
-            print m.group()
-    
+            print(m.group())
+
     def getState(self):
         return self.board
     def getQPlayerById(self, q_id):
@@ -117,7 +121,7 @@ class QuoridorGame:
         return self.players[0] if self.players[0].getColor() == color else player[1]
 
     def movePlayer(self, q_id, q_pmove)->bool:
-        if(!validMove(q_pmove)):
+        if not validMove(q_pmove):
             return False
         q_player = getQPlayerById(q_id)
         updateBoard(q_pmove)
@@ -127,7 +131,7 @@ class QuoridorGame:
         return True
 
     def placeWall(self, q_id, q_wmove)->bool:
-        if(!validMove(q_wmove)):
+        if not validMove(q_wmove) :
             return False
 
         self.walls.append(q_wmove.getWall())
@@ -136,8 +140,8 @@ class QuoridorGame:
         return True
 
     def isDone(self)->bool:
-        return players[0].coords[1] = i-1 or players[1].coords[1] = 0
-   
+        return players[0].coords[1] == i-1 or players[1].coords[1] == 0
+
     def validMove(self, q_move)->bool:
         return validWallPlace(q_move) if q_move.isWallPlace() else validPlayerMove(q_move)
 
@@ -154,11 +158,11 @@ class QuoridorGame:
             for w in self.walls:
                 if w.orient == ori and nw == w.getCoords()[0] and se.getCoords()[1] == se:
                     return False
-                if w.orient = "h":
+                if w.orient == "h":
                     if nw == w.getCoords[0] and se == tuple(se[0], se[1]-1):
                             return False
-                if w.orient = "v":
-                    if nw == w.getCoords()[0] == and tuple(se[0]+1, se[1]):
+                if w.orient == "v":
+                    if nw == w.getCoords[0] == and tuple(se[0]+1, se[1]):
                             return False
             #Check to make sure there's still a path to the goal
             #TODO Implement A* or something else
@@ -178,7 +182,7 @@ class QuoridorGame:
            return False
        if(x == q_player.getCoords()[0] and y == q_player.getCoords()[1]):
            return False
-        if(!isConnected(q_player.getCoords(), tuple(x,y)):
+        if not isConnected(q_player.getCoords(), tuple(x,y) :
                 return False
         return True
 
@@ -196,7 +200,7 @@ class QuoridorGame:
         else:
             x,y = last_p_move.getCoords()
             p_x, p_y, = self.getPlayerByColor(last_p_move.getPlayerColor()).getCoords()
-            
+
             #Check sparse matrix for all positions pointing to the last place and updates
             #TODO Check for walls
             if(p_x > 0):
@@ -207,10 +211,11 @@ class QuoridorGame:
                 self.board[transform_to_sparse(tuple(x,y), self.i)][transform_to_sparse(tuple(p_x, p_y-1), self.i)] = 1
             if(p_y < self.j-1):
                 self.board[transform_to_sparse(tuple(x,y), self.i)][transform_to_sparse(tuple(p_x, p_y+1), self.i)] = 1
-            
+                """
             for w in self.walls: #TODO Write conditions for checking a wall when a ove is made
                 if(p_x > 0):
                     if( (w.north_west[0] == p_x - 1 and w.north_west[1] == p_y) or w.north_west[
-        
+                """
+
 
 
