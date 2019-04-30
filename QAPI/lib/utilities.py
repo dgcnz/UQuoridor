@@ -2,6 +2,7 @@ from typing import List
 import uuid, re
 from pathlib import Path
 from qplayer import QPlayer
+from c_types import Coordinates
 
 
 def is_valid_pattern_move(raw_move: str, rows: int, cols: int):
@@ -79,3 +80,68 @@ def define_order(player_list: List[QPlayer],
     # TODO: Sorting. For now it returns the list assuming the first is the first in the list
 
     return player_list
+
+
+def parse_move(sequence: str):
+	"""
+	Parses move string sequence to an object 
+
+	Args:
+		sequence : Sequence encoded in the form xy[d]
+			x: Substring that encodes the horizontal position as a sequence of alphabetic characters.
+			y: Substring that encodes the vertical position as a sequence of numeric characters.
+			d: Optional character that encodes vertical (v) or horizontal (h) wall direction.
+	
+	Return value:
+		{
+			"type": "player" | "wall",
+			"coordinates": Coordinates(x, y),
+			"direction": None | "v" | "h"
+		}
+	
+	"""
+	
+	# Define type of object
+
+	is_player = sequence[-1].isnumeric()
+
+	if is_player:
+		obj_type = "player"
+		coordinate_string = sequence
+	else:
+		obj_type = "wall"
+		coordinate_string = sequence[:-1]
+	
+
+	# Define coordinates
+
+	coordinate_regex= re.match(r"([a-z]+)([0-9]+)", coordinate_string, re.I)
+
+	digits = [ord(char) - ord('a') for char in coordinate_regex.group(1)[::-1]]
+
+	y = 0
+
+	for digit in digits:
+		y *= 26
+		y += digit
+	
+	x = int(coordinate_regex.group(2)) - 1
+	
+	coordinates = Coordinates(x, y)
+
+
+	# Define Orientation
+
+	if is_player:
+		orientation = None
+	else:
+		orientation = sequence[-1]
+
+	
+	# Return object
+
+	return {
+		"type": obj_type,
+		"coordinates": coordinates,
+		"orientation": orientation
+	}
