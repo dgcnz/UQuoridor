@@ -65,16 +65,15 @@ def parse_players(raw_line: str) -> List[dict]:
     return res
 
 
-def define_order(player_list: List[QPlayer],
-                 first_player: int) -> List[QPlayer]:
+def sort_players(player_list: list, first_player: int) -> list:
     """ Sorts list clockwise relative to first_player
 
     Args:
-        player_list (List[QPlayer]) : List of QPlayers to be sorted
-        first_player : Player to be used as pivot
+        player_list (list) : List of players to be sorted
+        first_player : player to be used as pivot
 
     Returns:
-        (List[QPlayer]) : list of sorted players
+        (list) : list of sorted players
     """
     # TODO: Sorting. For now it returns the list assuming the first is the first in the list
 

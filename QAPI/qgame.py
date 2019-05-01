@@ -1,10 +1,13 @@
-from typing import List, Tuple
+from typing import List, Tuple, Type, Optional
 import pprint
 import uuid
 from pathlib import Path
-from lib.qmove import QMove
+from lib.qmove import QMove, QMovePlayer, QMoveWall
+from lib.qboard import QBoard
 from lib.qplayer import QPlayer
-from lib.utilities import parse_players, define_order
+from lib.c_types import Coordinates
+from lib.utilities import parse_players, sort_players
+import numpy as np
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -17,23 +20,31 @@ class QGame:
         current_player (QPlayer): Player to be executed
         plies (int): number of turns each player had so far
         last_move (QMove): move played by current_player.prev
-
+        board (np.ndarray[List[int]]): matrix
     """
 
     def __init__(self, player_list: List[dict], first_player: int,
                  time_per_player_game: int, board_size: int):
 
-        self.players = define_order(
-            [QPlayer(player, time_per_player_game) for player in player_list],
-            first_player)
+        self.players = [
+            QPlayer(player, time_per_player_game, i, board_size)
+            for i, player in enumerate(
+                sort_players(player_list, first_player))
+        ]
 
         self.plies = 0
         self.current_player = self.players[0]
         self.last_move = QMove("")
         self.history = []
         self.board_size = board_size
+        self.board = QBoard(board_size)
 
     def save_move(self, move: QMove, player: QPlayer):
+        """ Saves move to history
+
+        Note: This will allow games to be reproduced.
+        TODO: dump_history()
+        """
         self.history.append({
             "ply": self.plies,
             "player_name": player.get_name(),
@@ -61,6 +72,8 @@ class QGame:
 
         # Updating
 
+        self.current_player.update_coordinates(new_move.get_to())
+
         self.save_move(new_move, self.current_player)
 
         self.current_player = self.players[(self.current_player + 1) % len(
@@ -72,108 +85,64 @@ class QGame:
 
         return new_move.to_string()
 
-    def is_valid_move(self, move: QMove) -> bool:
-        if move.type == "wall":
+    def is_valid_move(self, move: Type[QMove]) -> bool:
+        """ Checks if move is valid given Wall and Player constraints
+        """
+        if isinstance(move, QMoveWall):
             return self.check_wall_place(move)
-        else:
+        elif isinstance(move, QMovePlayer):
             return self.check_player_move(move)
+        raise Exception("Wrong Type.")
 
-    def update_board(self, move: QMove):
-        #TODO : update board
+    def update_board(self, move: Type[QMove]) -> None:
+        # TODO: update_board
+        if move.type == "player":
+            return "owo"
 
-        if self.last_move == None:
-            return
+    def game_finished(self) -> Optional[QPlayer]:
+        """ Checks if game has finished.
 
-        #Update move on wall move
+        If yes, returns winner player, else returns None.
+        """
+        winner: Optional[QPlayer]
 
-        if self.last_move.isWallPlace():
-            #TODO Update move when wall is placed
-            a = 1
-
-        #Update board on player move
-        else:
-            x, y = last_p_move.getCoords()
-            p_x, p_y, = self.getPlayerByColor(
-                last_p_move.getPlayerColor()).getCoords()
-
-            #Check sparse matrix for all positions pointing to the last place and updates
-            #TODO Check for walls
-            if (p_x > 0):
-                self.board[transform_to_sparse(tuple(
-                    x, y), self.i)][transform_to_sparse(
-                        tuple(p_x - 1, p_y), self.i)] = 1
-            if (p_x < self.i - 1):
-                self.board[transform_to_sparse(tuple(
-                    x, y), self.i)][transform_to_sparse(
-                        tuple(p_x + 1, p_y), self.i)] = 1
-            if (p_y > 0):
-                self.board[transform_to_sparse(tuple(
-                    x, y), self.i)][transform_to_sparse(
-                        tuple(p_x, p_y - 1), self.i)] = 1
-            if (p_y < self.j - 1):
-                self.board[transform_to_sparse(tuple(
-                    x, y), self.i)][transform_to_sparse(
-                        tuple(p_x, p_y + 1), self.i)] = 1
-                """
-            for w in self.walls: #TODO Write conditions for checking a wall when a ove is made
-                if(p_x > 0):
-                    if( (w.north_west[0] == p_x - 1 and w.north_west[1] == p_y) or w.north_west[
-                """
-
-    def game_finished(self) -> QPlayer:
-        winner: QPlayer = None
-
-        for i, player in enumerate(player):
+        for i, player in enumerate(self.players):
             abs_i = i * 4 / len(self.players)
             if abs_i == 0:
-                if player.get_coords().x == self.board_size:
+                if player.coordinates.x == self.board_size:
                     winner = player
             elif abs_i == 1:
-                if player.get_coords().y == self.board_size:
+                if player.coordinates.y == self.board_size:
                     winner = player
             elif abs_i == 2:
-                if player.get_coords().x == 0:
+                if player.coordinates.x == 0:
                     winner = player
             elif abs_i == 3:
-                if player.get_coords().y == 0:
+                if player.coordinates.y == 0:
                     winner = player
 
         return winner
 
-    def check_wall_place(self, move: QMove):
-        wall_t = move.get_wall()
-        nw, se = wall_t.get_points()
-        ori = wall_t.get_orientation()
-
-        #Check for making sure it's not place on top of other wall
-        for w in self.walls:
-            if w.orient == ori and nw == w.get_points()[0] and se.get_coords()[1] == se:
-                return False
-            if w.orient == "h":
-                if nw == w.get_coordsi[0] and se == tuple(se[0], se[1] - 1):
-                    return False
-            if w.orient == "v":
-                if nw == w.get_coords()[0] and tuple(se[0] + 1, se[1]):
-                    return False
-
-        #Check to make sure there's still a path to the goal
-
-        #TODO Implement A* or something else
-
+    def check_wall_place(self, move: QMoveWall) -> bool:
+        """ Check if Wall placement is legal
+        Algorithm:
+            * Check if wall overlaps with other wall
+            * Check if wall is in it's entirety in the board
+            * Check if wall blocks the last path from any player to its goal
+        """
         return True
 
-    def check_player_move(self, move: QMove):
-        q_player = getQPlayerByColor(q_pmove.getPlayerColor())
-        x, y = move.getTo()
+    def check_player_move(self, move: QMovePlayer) -> bool:
+        player = self.players[self.plies % len(self.players)]
+        x, y = move.get_to()
 
-        # Make sure player is going to a valid position
-
-        return isConnected(q_player.getCoords(), tuple(x, y))
+        return self.board.connected(player.coordinates, Coordinates(x, y))
 
 
 def main():
     players: list
     first: int
+    board_size = 9
 
     players = parse_players(input("Enter players:\n\t>> "))
 
@@ -183,7 +152,7 @@ def main():
     # TODO: hard code better time or input to choose time (seconds per entire playerxgame)
     time_per_player_game = 300
 
-    quoridor = QGame(players, first, time_per_player_game)
+    quoridor = QGame(players, first, time_per_player_game, board_size)
 
 
 if __name__ == '__main__':
