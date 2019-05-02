@@ -27,9 +27,9 @@ class QGame:
                  time_per_player_game: int, board_size: int):
 
         self.players = [
-            QPlayer(player, time_per_player_game, i, board_size)
-            for i, player in enumerate(
-                sort_players(player_list, first_player))
+            QPlayer(player, time_per_player_game, i, board_size,
+                    len(player_list)) for i, player in enumerate(
+                        sort_players(player_list, first_player))
         ]
 
         self.plies = 0
@@ -127,12 +127,25 @@ class QGame:
         """ Check if Wall placement is legal
         Algorithm:
             * Check if wall overlaps with other wall
-            * Check if wall is in it's entirety in the board
+            * Check if wall is within board bounds
             * Check if wall blocks the last path from any player to its goal
         """
+
+        # TODO: Check if wall overlaps with wall
+        # TODO: Check if wall is within board bounds
+
+        illegal_move = False
+
+        self.board.place_wall(move)
+        for player in players:
+            if not self.board.connected(player.coordinates, player.goals):
+                self.board.remove_wall(move)
+                return False
         return True
 
     def check_player_move(self, move: QMovePlayer) -> bool:
+
+        # TODO: check if move is within board bounds
         player = self.players[self.plies % len(self.players)]
         x, y = move.get_to()
 

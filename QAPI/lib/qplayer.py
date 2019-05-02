@@ -2,7 +2,7 @@ from qmove import QMove
 from subprocess import Popen, PIPE
 from c_types import Coordinates
 import os
-from typing import Optional
+from typing import Optional, List
 
 
 class QPlayer:
@@ -32,17 +32,38 @@ class QPlayer:
         self.color = player_raw["color"]
         self.time_per_game = time_per_player_game
         self.start_side = start_side
+        self.board_size = board_size
         self.n_players = n_players
         self.coordinates = self.get_starting_coordinates(
             board_size, start_side)
+
+        self.goals: List[Coordinates] = self.get_goal_states(
+            self.coordinates, self.board_size)
 
         if self.is_ai and os.path.isfile(self.executable):
             self.proc: Optional[Popen] = self.start_ai(
                 self.executable,
                 self.n_players,
+                self.board_size,
                 self.time_per_game,
                 self.start_side,
             )
+
+    def get_name(self):
+        return self.name
+
+    def get_uuid(self):
+        return self.id_
+
+    def get_goal_states(self, start_coords: Coordinates, board_size: int):
+        if start_coords.x == 0 or start_coords.x == self.board_size - 1:
+            new_x = board_size - 1 if start_coords.x == 0 else 0
+            for i in range(self.board_size):
+                self.goals.append(Coordinates(new_x, i))
+        else:
+            new_y = board_size - 1 if start_coords.y == 0 else 0
+            for i in range(self.board_size):
+                self.goals.append(Coordinates(i, new_y))
 
     def get_starting_coordinates(self, board_size: int,
                                  start_side: int) -> Coordinates:
@@ -61,13 +82,13 @@ class QPlayer:
 
         return coords
 
-    def start_ai(self, executable: str, n_players: int, time_per_game: int,
-                 start_side: int) -> Popen:
+    def start_ai(self, executable: str, n_players: int, board_size: int,
+                 time_per_game: int, start_side: int) -> Popen:
         """ Initialize AI with corresponding starting position
         """
         proc = Popen([executable], stdin=PIPE, stdout=PIPE)
 
-        INIT_MSG = f"$START {n_players} {start_side} {time_per_game}"
+        INIT_MSG = f"$START {n_players} {board_size} {start_side} {time_per_game}"
 
         proc.stdin.write(str.encode(INIT_MSG + '\n'))
         proc.stdin.flush()
