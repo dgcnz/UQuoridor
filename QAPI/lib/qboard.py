@@ -2,6 +2,7 @@ import numpy as np
 from typing import Union, Optional, Tuple, List, Set
 from c_types import Coordinates
 from operator import itemgetter
+from qmove import QMoveWall
 
 
 class QBoard:
@@ -60,6 +61,16 @@ class QBoard:
 
                 self.matrix[(y, x)] = edges
 
+    def place_wall(self, move: QMoveWall) -> None:
+        """ Remove edges corresponding to valid QMoveWall
+        """
+        # TODO: IMPORTANT - place_wall()
+
+    def remove_wall(self, move: QMoveWall) -> None:
+        """ Remove edges corresponding to valid QMoveWall
+        """
+        # TODO: IMPORTANT - remove_wall()
+
     def connected(self,
                   p1: Coordinates,
                   p2: Union[List[Coordinates], Coordinates],
@@ -69,7 +80,7 @@ class QBoard:
         Note: distance is calculated as number of edges away from one point
         """
 
-        if dist == 1 and isistance(p2, Coordinates):
+        if dist == 1 and isinstance(p2, Coordinates):
             # Checks for single edge existence
             for p_i in self.matrix[p1]:
                 if p_i == p2:
@@ -84,7 +95,7 @@ class QBoard:
             # Checks if there is at least one path between p1 and its goal
             return path_exists(self, p1, p2)
         else:
-            # Checks path in bounded dist
+            # TODO: Checks path in bounded dist
             return True
 
     def __getitem__(self, key: Union[Coordinates, Tuple[int, int]]

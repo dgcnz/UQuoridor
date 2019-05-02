@@ -35,7 +35,7 @@ class QGame:
         self.plies = 0
         self.current_player = self.players[0]
         self.last_move = QMove("")
-        self.history = []
+        self.history: List[dict] = []
         self.board_size = board_size
         self.board = QBoard(board_size)
 
@@ -95,9 +95,9 @@ class QGame:
         raise Exception("Wrong Type.")
 
     def update_board(self, move: Type[QMove]) -> None:
-        # TODO: update_board
-        if move.type == "player":
-            return "owo"
+        # TODO: Support for update player ¿?
+        if isinstance(move, QMoveWall):
+            self.board.place_wall(move)
 
     def game_finished(self) -> Optional[QPlayer]:
         """ Checks if game has finished.
@@ -131,13 +131,11 @@ class QGame:
             * Check if wall blocks the last path from any player to its goal
         """
 
-        # TODO: Check if wall overlaps with wall
-        # TODO: Check if wall is within board bounds
-
-        illegal_move = False
+        # TODO - IMPORTANT: Check if wall overlaps with wall
+        # TODO - IMPORTANT: Check if wall is within board bounds
 
         self.board.place_wall(move)
-        for player in players:
+        for player in self.players:
             if not self.board.connected(player.coordinates, player.goals):
                 self.board.remove_wall(move)
                 return False
